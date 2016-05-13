@@ -111,7 +111,62 @@ class Command       //class command to make objects out of each command
             return false;
         }
         
-        void execute()        //executes command 
+        void execute(int t)
+        {
+          string x = this -> command;
+          string y = this -> argument;
+          bool exi = this -> is_exit;
+
+          if(exi == true)
+          {
+            exit(0);
+          }
+          if(x == "")
+          {
+            return;
+          }
+          bool executed;
+          if(t == 1)
+          {
+            executed = run(x,y);
+          }
+          else
+          {
+            if(fail)
+            {
+              fail -> execute(0);
+            }
+            if(next)
+            {
+              next -> execute(1);
+            }
+            if(pass)
+            {
+              pass -> execute(1);
+            }
+            return;
+          }
+          if(next)
+          {
+            next -> execute(1);
+          }
+          if(pass && executed == true)
+          {
+            pass -> execute(1);
+          }
+          if(fail && executed == false)
+          {
+            fail -> execute(1);
+          }
+          if(fail && executed == true)
+          {
+            fail -> execute(0);
+          }
+          return;
+        }
+
+        
+        /*void execute()        //executes command 
         {
             string x = this -> command;
             string y = this -> argument;
@@ -146,6 +201,10 @@ class Command       //class command to make objects out of each command
             //will need rethinking -> restructure execute
             if(fail && executed == true)
             {
+              if(fail -> next == NULL && fail -> pass == NULL && fail -> fail == NULL)
+              {
+                return;
+              }
               if(fail -> pass)
               {
                 fail -> pass -> execute();
@@ -154,6 +213,18 @@ class Command       //class command to make objects out of each command
               {
                 fail -> next -> execute();
               }
+              if(fail -> next == NULL && fail -> pass == NULL && fail -> fail == NULL)
+              {
+                return;
+              }
+              if(fail -> pass)
+
+
+              if(fail -> fail -> next == NULL && fail -> fail -> pass == NULL && fail -> fail -> fail == NULL)
+              {
+                return;
+              }
+
               if(fail -> fail -> pass)
               {
                 fail -> fail -> pass -> execute();
@@ -164,7 +235,7 @@ class Command       //class command to make objects out of each command
               }
             }
             return;
-        }
+        }*/
 };
 
 #endif

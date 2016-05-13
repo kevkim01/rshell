@@ -14,7 +14,7 @@ int main()
         c.read_in();        //reads in the line from the user and stores it in the object c
         line = c.get_line();    //retrieve the line input
         Command s = c.parse(line);  //creates a command by parsing the line
-        s.execute();
+        s.execute(1);
     }
     return 0;
 }
