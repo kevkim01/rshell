@@ -64,7 +64,7 @@ class Command       //class command to make objects out of each command
         
         void set_pass(Command* c)        //sets pointer to next command in case of &&
         {pass = c;}
-        
+
         bool run(string x, string y)
         {
             pid_t pid = fork();
@@ -117,15 +117,14 @@ class Command       //class command to make objects out of each command
             string y = this -> argument;
             bool exi = this -> is_exit;
 
-            if(x == "")     //if the command recieved is essentially nothing, the program will do nothing
-            {
-                return;
-            }
             if(exi == true)
             {
               exit(0);
             }
-            
+            if(x == "")     //if the command recieved is essentially nothing, the program will do nothing
+            {
+                return;
+            }  
             bool executed = run(x,y);
             if(next)  //if the command has a next pointer execute next command regardless
             {
@@ -143,6 +142,26 @@ class Command       //class command to make objects out of each command
             {
                 cout << "bash: invalid command: " << command << " or argument: " << argument << endl;
                 fail -> execute();
+            }
+            //will need rethinking -> restructure execute
+            if(fail && executed == true)
+            {
+              if(fail -> pass)
+              {
+                fail -> pass -> execute();
+              }
+              if(fail -> next)
+              {
+                fail -> next -> execute();
+              }
+              if(fail -> fail -> pass)
+              {
+                fail -> fail -> pass -> execute();
+              }
+              if(fail -> fail -> next)
+              {
+                fail -> fail -> next -> execute();
+              }
             }
             return;
         }
