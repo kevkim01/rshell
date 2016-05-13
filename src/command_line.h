@@ -68,7 +68,11 @@ class Command_Line          //class that handles the command line input and pars
             split >> temp;
             if(temp == "exit")
             {
-                exit(0);
+              bool ex = true;
+              ///////////////////    edit   /////////////////
+              Command cmd;
+              cmd.set_exit(ex);
+              return cmd;
             }
             command = temp; //command will be the first part of the string
             if(temp.at(0) == '#')

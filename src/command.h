@@ -26,12 +26,14 @@ class Command       //class command to make objects out of each command
         Command* next;// = 0;  //used with ; connector
         Command* fail;// = 0;  //used with || connector
         Command* pass;// = 0;  //used with && connector
+        bool is_exit; //tells whether the command is execute or not
     public:
         Command()
         {
           next = NULL;
           fail = NULL;
           pass = NULL;
+          is_exit = false;
         };
         Command(string c, string a)     //constructor
         {
@@ -40,8 +42,14 @@ class Command       //class command to make objects out of each command
             next = NULL;
             fail = NULL;
             pass = NULL;
+            is_exit = false;
         }
-        
+        //edit made
+        void set_exit(bool x)
+        {
+          is_exit = x;
+        }
+        //edit end
         string get_cmd()            //returns the command
         {return command;}
         
@@ -107,10 +115,15 @@ class Command       //class command to make objects out of each command
         {
             string x = this -> command;
             string y = this -> argument;
-            
+            bool exi = this -> is_exit;
+
             if(x == "")     //if the command recieved is essentially nothing, the program will do nothing
             {
                 return;
+            }
+            if(exi == true)
+            {
+              exit(0);
             }
             
             bool executed = run(x,y);
