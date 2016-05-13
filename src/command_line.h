@@ -93,7 +93,9 @@ class Command_Line          //class that handles the command line input and pars
                 Command* ptr = new Command;
                 *ptr = parse(t);
                 cmd.set_next(ptr);
-                
+                //edit
+                cmd.set_following(ptr);
+                //end edit
                 return cmd;
             }
             
@@ -116,7 +118,10 @@ class Command_Line          //class that handles the command line input and pars
                     Command* ptr = new Command;
                     *ptr = parse(t);
                     cmd.set_next(ptr);
-                    
+                    //edit
+                    cmd.set_following(ptr);
+                    //end edit
+
                     return cmd;
                 }
                 if(temp.at(0) == '#')       //checks for comments at beginning (no space)
@@ -144,6 +149,10 @@ class Command_Line          //class that handles the command line input and pars
                     *ptr = parse(t);
                     cmd.set_pass(ptr);
                     
+                    //edit
+                    cmd.set_following(ptr);
+                    //end edit
+
                     return cmd;
                 }
                 else if(temp == "||")       //checks for || (spaces on both sides)
@@ -161,6 +170,10 @@ class Command_Line          //class that handles the command line input and pars
                     *ptr = parse(t);
                     cmd.set_fail(ptr);
                     
+                    //edit
+                    cmd.set_following(ptr);
+                    //end edit
+
                     return cmd;
                 }
                 argument += temp + " ";     //if not a connector it is part of the argument

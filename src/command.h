@@ -26,6 +26,7 @@ class Command       //class command to make objects out of each command
         Command* next;// = 0;  //used with ; connector
         Command* fail;// = 0;  //used with || connector
         Command* pass;// = 0;  //used with && connector
+        Command* following; //any command with commands following it will have this
         bool is_exit; //tells whether the command is execute or not
     public:
         Command()
@@ -33,6 +34,7 @@ class Command       //class command to make objects out of each command
           next = NULL;
           fail = NULL;
           pass = NULL;
+          following = NULL;
           is_exit = false;
         };
         Command(string c, string a)     //constructor
@@ -42,8 +44,18 @@ class Command       //class command to make objects out of each command
             next = NULL;
             fail = NULL;
             pass = NULL;
+            following = NULL;
             is_exit = false;
         }
+        //edit made: destructor
+        void clear()
+        {
+          for(Command* curr = following; curr != NULL; curr = curr -> following)
+          {
+            delete curr;
+          }
+        }
+
         //edit made
         void set_exit(bool x)
         {
@@ -64,6 +76,9 @@ class Command       //class command to make objects out of each command
         
         void set_pass(Command* c)        //sets pointer to next command in case of &&
         {pass = c;}
+
+        void set_following(Command* c)
+        {following = c;}
 
         bool run(string x, string y)
         {
