@@ -10,8 +10,8 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-#include <boost/tokenizer.hpp>
-#include <boost/foreach.hpp>
+//#include <boost/tokenizer.hpp>
+//#include <boost/foreach.hpp>
 #include <sys/types.h>
 #include <pwd.h>
 
