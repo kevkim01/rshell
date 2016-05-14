@@ -14,9 +14,10 @@
 //#include <boost/foreach.hpp>
 #include <sys/types.h>
 #include <pwd.h>
+#include <vector>
 
 using namespace std;
-using namespace boost;
+//using namespace boost;
 
 class Command       //class command to make objects out of each command
 {
@@ -93,7 +94,15 @@ class Command       //class command to make objects out of each command
                 char* command = (char*)x.c_str();
                 
                 vector<string> argus;           //vector of argument strings
-                char_separator<char> sep(" ");
+
+                istringstream ss(y);
+                string temp;
+                while(ss >> temp)
+                {
+                  argus.push_back(temp);
+                }
+                //edit
+                /*char_separator<char> sep(" ");
                 
                 tokenizer<char_separator<char> > tokens(y, sep);
                 
@@ -101,7 +110,7 @@ class Command       //class command to make objects out of each command
                 {
                   argus.push_back(t);
                 } //splitting the argument into separate strings
-                
+                */
                 int size = 2 + argus.size();    //size = command + NULL + # of arguments
                 char** const args = new char*[size];
                 args[0] = command;
