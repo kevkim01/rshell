@@ -10,14 +10,11 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-//#include <boost/tokenizer.hpp>
-//#include <boost/foreach.hpp>
 #include <sys/types.h>
 #include <pwd.h>
 #include <vector>
 
 using namespace std;
-//using namespace boost;
 
 class Command       //class command to make objects out of each command
 {
@@ -28,7 +25,6 @@ class Command       //class command to make objects out of each command
         Command* fail;// = 0;  //used with || connector
         Command* pass;// = 0;  //used with && connector
         Command* following; //any command with commands following it will have this
-        bool is_exit; //tells whether the command is execute or not
     public:
         Command()
         {
@@ -36,7 +32,6 @@ class Command       //class command to make objects out of each command
           fail = NULL;
           pass = NULL;
           following = NULL;
-          is_exit = false;
         };
         Command(string c, string a)     //constructor
         {
@@ -46,7 +41,6 @@ class Command       //class command to make objects out of each command
             fail = NULL;
             pass = NULL;
             following = NULL;
-            is_exit = false;
         }
         //edit made: destructor
         void clear()
@@ -57,12 +51,6 @@ class Command       //class command to make objects out of each command
           }
         }
 
-        //edit made
-        void set_exit(bool x)
-        {
-          is_exit = x;
-        }
-        //edit end
         string get_cmd()            //returns the command
         {return command;}
         
@@ -83,6 +71,10 @@ class Command       //class command to make objects out of each command
 
         bool run(string x, string y)
         {
+          if(x == "exit")
+          {
+            exit(0);
+          }
             pid_t pid = fork();
             if(pid == -1)       //if fork doesnt run correctly - error
             {
@@ -102,15 +94,6 @@ class Command       //class command to make objects out of each command
                   argus.push_back(temp);
                 }
                 //edit
-                /*char_separator<char> sep(" ");
-                
-                tokenizer<char_separator<char> > tokens(y, sep);
-                
-                BOOST_FOREACH(string t, tokens)
-                {
-                  argus.push_back(t);
-                } //splitting the argument into separate strings
-                */
                 int size = 2 + argus.size();    //size = command + NULL + # of arguments
                 char** const args = new char*[size];
                 args[0] = command;
@@ -121,7 +104,7 @@ class Command       //class command to make objects out of each command
                 }
                 if(execvp(command, args) < 0)
                 {
-                    return false;
+                    perror("bash");
                     exit(1);
                 }
                 return true;
@@ -135,16 +118,11 @@ class Command       //class command to make objects out of each command
             return false;
         }
         
-        void execute(int t)
+        void execute(int t, bool previous)
         {
           string x = this -> command;
           string y = this -> argument;
-          bool exi = this -> is_exit;
 
-          if(exi == true)
-          {
-            exit(0);
-          }
           if(x == "")
           {
             return;
@@ -156,110 +134,46 @@ class Command       //class command to make objects out of each command
           }
           else
           {
-            if(fail)
+            if(fail && previous == true)
             {
-              fail -> execute(0);
+              fail -> execute(0, false);
+            }
+            if(fail && previous == false)
+            {
+              fail -> execute(1, true);
             }
             if(next)
             {
-              next -> execute(1);
+              next -> execute(1, true);
             }
             if(pass)
             {
-              pass -> execute(1);
+              pass -> execute(1, true);
             }
             return;
           }
           if(next)
           {
-            next -> execute(1);
+            next -> execute(1, true);
           }
           if(pass && executed == true)
           {
-            pass -> execute(1);
+            pass -> execute(1, true);
+          }
+          if(pass && executed == false)
+          {
+            pass -> execute(0, false);
           }
           if(fail && executed == false)
           {
-            fail -> execute(1);
+            fail -> execute(1, false);
           }
           if(fail && executed == true)
           {
-            fail -> execute(0);
+            fail -> execute(0, true);
           }
           return;
         }
-
-        
-        /*void execute()        //executes command 
-        {
-            string x = this -> command;
-            string y = this -> argument;
-            bool exi = this -> is_exit;
-
-            if(exi == true)
-            {
-              exit(0);
-            }
-            if(x == "")     //if the command recieved is essentially nothing, the program will do nothing
-            {
-                return;
-            }  
-            bool executed = run(x,y);
-            if(next)  //if the command has a next pointer execute next command regardless
-            {
-                if(executed == false)
-                {
-                     cout << "bash: invalid command: " << command << " or argument: " << argument << endl;
-                }
-                next -> execute();
-            }
-            if(pass && executed == true)  //if the command has a pass pointer and the previous executed
-            {
-                pass -> execute();
-            }
-            if(fail && executed == false) //if the command has a fail pointer and the previous executed
-            {
-                cout << "bash: invalid command: " << command << " or argument: " << argument << endl;
-                fail -> execute();
-            }
-            //will need rethinking -> restructure execute
-            if(fail && executed == true)
-            {
-              if(fail -> next == NULL && fail -> pass == NULL && fail -> fail == NULL)
-              {
-                return;
-              }
-              if(fail -> pass)
-              {
-                fail -> pass -> execute();
-              }
-              if(fail -> next)
-              {
-                fail -> next -> execute();
-              }
-              if(fail -> next == NULL && fail -> pass == NULL && fail -> fail == NULL)
-              {
-                return;
-              }
-              if(fail -> pass)
-
-
-              if(fail -> fail -> next == NULL && fail -> fail -> pass == NULL && fail -> fail -> fail == NULL)
-              {
-                return;
-              }
-
-              if(fail -> fail -> pass)
-              {
-                fail -> fail -> pass -> execute();
-              }
-              if(fail -> fail -> next)
-              {
-                fail -> fail -> next -> execute();
-              }
-            }
-            return;
-        }*/
 };
 
 #endif

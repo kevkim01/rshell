@@ -10,14 +10,11 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-//#include <boost/tokenizer.hpp>
-//#include <boost/foreach.hpp>
 #include <sys/types.h>
 #include <pwd.h>
 #include "command.h"
 
 using namespace std;
-//using namespace boost;
 
 class Command_Line          //class that handles the command line input and parsing
 {
@@ -60,20 +57,12 @@ class Command_Line          //class that handles the command line input and pars
             
             if(line == "")      //if the line has no content
             {
-                Command cmd(command, argument);
+                Command cmd;
                 return cmd;
             }
             
             istringstream split(line);      //split the line by whitespaces
             split >> temp;
-            if(temp == "exit")
-            {
-              bool ex = true;
-              ///////////////////    edit   /////////////////
-              Command cmd;
-              cmd.set_exit(ex);
-              return cmd;
-            }
             command = temp; //command will be the first part of the string
             if(temp.at(0) == '#')
             {
@@ -85,7 +74,9 @@ class Command_Line          //class that handles the command line input and pars
                 command = temp.substr(0, temp.size()-1);
                 string t;
                 while(split >> temp)
-                { t += temp + " ";}
+                {
+                  t += temp + " ";
+                }
                 t = t.substr(0, t.size()-1);
                     
                 Command cmd(command, argument);
@@ -93,9 +84,7 @@ class Command_Line          //class that handles the command line input and pars
                 Command* ptr = new Command;
                 *ptr = parse(t);
                 cmd.set_next(ptr);
-                //edit
                 cmd.set_following(ptr);
-                //end edit
                 return cmd;
             }
             
@@ -118,24 +107,17 @@ class Command_Line          //class that handles the command line input and pars
                     Command* ptr = new Command;
                     *ptr = parse(t);
                     cmd.set_next(ptr);
-                    //edit
                     cmd.set_following(ptr);
-                    //end edit
-
                     return cmd;
                 }
-                if(temp.at(0) == '#')       //checks for comments at beginning (no space)
+                if(temp.at(0) == '#' || temp == "#")       //checks for comments at beginning (no space)
                 {
                     Command cmd(command, argument);
                     return cmd;
                 }
-                else if(temp == "#")       // checks for comments (space on both sides)
+                else if(temp == "&&" || temp == "||" || temp == ";")       // checks for && (spaces on both sides)
                 {
-                    Command cmd(command, argument);
-                    return cmd;
-                }
-                else if(temp == "&&")       // checks for && (spaces on both sides)
-                {
+                    string connector = temp;
                     string t;
                     while(split >> temp)
                     {
@@ -147,33 +129,19 @@ class Command_Line          //class that handles the command line input and pars
                     
                     Command* ptr = new Command;
                     *ptr = parse(t);
-                    cmd.set_pass(ptr);
-                    
-                    //edit
-                    cmd.set_following(ptr);
-                    //end edit
-
-                    return cmd;
-                }
-                else if(temp == "||")       //checks for || (spaces on both sides)
-                {
-                    string t;
-                    while(split >> temp)
+                    if(connector == "&&")
                     {
-                        t += temp + " ";
+                      cmd.set_pass(ptr);
                     }
-                    t = t.substr(0, t.size()-1);
-                    
-                    Command cmd(command, argument);
-                    
-                    Command* ptr = new Command;
-                    *ptr = parse(t);
-                    cmd.set_fail(ptr);
-                    
-                    //edit
+                    else if(connector == "||")
+                    {
+                      cmd.set_fail(ptr);
+                    }
+                    else if(connector == ";")
+                    {
+                      cmd.set_next(ptr);
+                    }
                     cmd.set_following(ptr);
-                    //end edit
-
                     return cmd;
                 }
                 argument += temp + " ";     //if not a connector it is part of the argument
