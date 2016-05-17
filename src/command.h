@@ -14,6 +14,7 @@
 #include <pwd.h>
 #include <vector>
 
+
 using namespace std;
 
 class Command       //class command to make objects out of each command
@@ -42,6 +43,7 @@ class Command       //class command to make objects out of each command
             pass = NULL;
             following = NULL;
         }
+
         //edit made: destructor
         void clear()
         {
@@ -69,7 +71,7 @@ class Command       //class command to make objects out of each command
         void set_following(Command* c)
         {following = c;}
 
-        bool run(string x, string y)
+        bool run(string x, string y)//, bool &global)
         {
           if(x == "exit")
           {
@@ -105,7 +107,8 @@ class Command       //class command to make objects out of each command
                 if(execvp(command, args) < 0)
                 {
                     perror("bash");
-                    exit(1);
+                    return false;
+                    //exit(1);
                 }
                 return true;
             }
