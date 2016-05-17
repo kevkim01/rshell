@@ -26,11 +26,10 @@ of its subsequent commands that it points to. The execution itself was taken
 care of by the run() function (used inside of execute()) which used execvp 
 to run the command with its proper arguments.
   
-  One of the bugs we found is with the exit command. When the user enters
+  The main bug we found is with the exit command. When the user enters
 "exit", the program should execute any commands prior, and then break out
 of the program, or if there are no prior commands, the program should just
-end. However, we can't seem to find the source of our error when something
-like this is called:
+end. However, when something like this is called:
 
           echo hi && echo a || ls ; sl || date
           date ; sl || echo a && echo b && echo c
@@ -39,12 +38,21 @@ like this is called:
 
 in succession, the commands themselves would run, but for some reason,
 when the exit is called, the program doesn't exit right away. Instead,
-you need to continuously type exit, until the program ends. (I don't 
-actually know if the case above will do this, but when a lot of commands
-have been processed and run, this will happen). We think that the problem 
-lies in the nesting created by the for loop. We can't really pinpoint the 
-cause since we created a destructor that deletes the dynamically allocated
-data and don't have any nested loops.
+you need to continuously type exit, until the program ends. The problem
+is caused where we call execvp. When execvp == -1 we should call exit(1)
+however, we call return false instead. This is because the rest of our
+execute relys on the return value. We couldn't figure out a way to extract
+the false value when execvp fails before calling exit. We tried using
+pass by reference, global variables, and extra member functions, but
+none of that worked. Thus we decided that the proper functionality of our
+exit function wasn't as important as the proper functionality of the rest
+of our program.
+
+  To go into more depth. The exit function will not work when execvp fails.
+Thus if a command such as sl, which is not a command is called, exit will
+become buggy. As I said before there is no exit(1) called when execvp fails,
+which is the cause of this problem, but we need to return false instead for
+the rest of the program to work properly.
 
 
 
