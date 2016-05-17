@@ -35,3 +35,12 @@ ls && ls && ls
 
 ls; ls; ls
 
+echo hello && ls; sl || date; echo ABC
+
+sl || sl || echo hi; ls && sl; ls && ls || sl
+
+sl; sl; sl
+
+ls && ls || sl
+
+sl && ls || ls
