@@ -226,9 +226,10 @@ class Command_Line          //class that handles the command line input and pars
                 continue;
                 argument += temp + " ";     //if not a connector it is part of the argument
               }
-              Command cmd(command, argument); //default, function needs to return at least a command
-              return cmd;
             }
-        };
+            Command cmd(command, argument); //default, function needs to return at least a command
+            return cmd;
+        }
+};
 
 #endif

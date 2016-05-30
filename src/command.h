@@ -13,7 +13,7 @@
 #include <pwd.h>
 #include <vector>
 #include <algorithm>
-//#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string.hpp>
 #include <string>
 #include <sys/stat.h>
 
@@ -176,13 +176,13 @@ class Command       //class command to make objects out of each command
         bool test(string line)
         {
           vector<string> strs;
-          //boost::split(strs, line, boost::is_any_of(" "));
-          string temp;
-          istringstream ss(line);
-          while(ss >> temp)
-          {
-            strs.push_back(temp);
-          }
+          boost::split(strs, line, boost::is_any_of(" "));
+          //string temp;
+          //istringstream ss(line);
+          //while(ss >> temp)
+          //{
+            //strs.push_back(temp);
+          //}
 
           bool b = false;
           if(strs.at(0).at(0) == '-')
