@@ -54,9 +54,10 @@ class Command_Line          //class that handles the command line input and pars
             string command;
             string argument;
             string temp;
-
+            //--------------------------------------------
             bool p_begin = false;
             bool p_end = false;
+            //--------------------------------------------
             
             if(line == "")      //if the line has no content
             {
@@ -66,41 +67,43 @@ class Command_Line          //class that handles the command line input and pars
             
             istringstream split(line);      //split the line by whitespaces
             split >> temp;
-            //command = temp; //command will be the first part of the string
             
             if(temp.at(0) == '#')
             {
                 Command cmd;
                 return cmd;
             }
-
+            /////////////////////////////////////
             if(temp == "(")
             {
-              p_begin = true;
-              split >> temp;
+                p_begin = true;
+                split >> temp;
             }
-
+            
             if(temp.at(0) == '(')
             {
-              p_begin = true;
-              temp = temp.substr(1, temp.size() -1);
+                p_begin = true;
+                //in_paren = true;        //sets in_paren to true if beginning of parenthesis is recognized
+                temp = temp.substr(1, temp.size()-1);
             }
-
-            if(temp.at(temp.size() -1) == ')')
+            
+            if(temp.at(temp.size()-1) == ')')
             {
-              p_end = true;
-              temp = temp.substr(0, temp.size() -1);
+                p_end = true;
+                //in_paren = false;       //sets in_paren back to false when end of () is reached
+                temp = temp.substr(0, temp.size()-1);
             }
-            //^^^^^^^^^^^^^^^^^^^^^^ edit made ^^^^^^^^^^^^^^^^^^^^^^^^^^
-            command = temp;
-
+            /////////////////////////////////////
+            
+            command = temp; //command will be the first part of the string
             if(command.at(command.size() -1) == ';')        //checks to see if there is a ; after the base command
             {
                 command = temp.substr(0, temp.size()-1);
-                if(command.at(command.size()-1) == ')')
+                if(command.at(command.size() -1) == ')')
                 {
-                  p_end = true;
-                  command = command.substr(0, command.size() -1);
+                    p_end = true;
+                    //in_paren = false;
+                    command = command.substr(0, command.size()-1);
                 }
                 string t;
                 while(split >> temp)
@@ -112,123 +115,124 @@ class Command_Line          //class that handles the command line input and pars
                 Command cmd(command, argument);
                     
                 Command* ptr = new Command;
-                *ptr = parse(t);
+                *ptr = parse(t); //edit---------------------------
                 cmd.set_next(ptr);
                 cmd.set_following(ptr);
                 if(p_begin == true)
                 {
-                  cmd.set_open_paren(true);
+                    cmd.set_open_paren(true);
                 }
                 if(p_end == true)
                 {
-                  cmd.set_close_paren(true);
+                    cmd.set_close_paren(true);
                 }
                 return cmd;
             }
             if(command == "[")
             {
-              command = "test";
+                command = "test";
             }
             
             while(split >> temp)    //continues to read in the string until a connector is met
             {
-              if(temp == ")")
-              {
-                p_end = true;
-                continue;
-              }
-
-              if(temp.at(temp.size() -1) == ')')
-              {
-                p_end = true;
-                temp = temp.substr(0, temp.size() -1);
-              }
-
-              if(temp.at(temp.size() -1) == ';')  //checks for ; at the end of an argument (no space)
-              {
-                string s = temp.substr(0, temp.size()-1);
-                if(s.size() != 0 && s.at(s.size()-1) == ')')
+                if(temp == ")")
                 {
-                  p_end = true;
-                  s = s.substr(0, s.size() -1);
+                    p_end = true;
+                    continue;
                 }
-                argument += s;
+                if(temp.at(temp.size() -1) == ')')
+                {
+                    p_end = true;
+                    temp = temp.substr(0, temp.size()-1);
+                    //cout << temp << endl;
+                    //in_paren = false;
+                }
+                
+                if(temp.at(temp.size() -1) == ';')  //checks for ; at the end of an argument (no space)
+                {
+                    string s = temp.substr(0, temp.size()-1);
+                    if(s.size() != 0 && s.at(s.size() -1) == ')')
+                    {
+                        p_end = true;
+                        //in_paren = false;
+                        s = s.substr(0, s.size()-1);
+                    }
+                    argument += s;
                     
-                string t;
-                while(split >> temp)
-                {
-                  t += temp + " ";
-                }
-                t = t.substr(0, t.size()-1);
+                    string t;
+                    while(split >> temp)
+                    {
+                        t += temp + " ";
+                    }
+                    t = t.substr(0, t.size()-1);
                     
-                Command cmd(command, argument);
+                    Command cmd(command, argument);
                     
-                Command* ptr = new Command;
-                *ptr = parse(t);
-                cmd.set_next(ptr);
-                cmd.set_following(ptr);
-
-                if(p_begin == true)
-                {
-                  cmd.set_open_paren(true);
+                    Command* ptr = new Command;
+                    *ptr = parse(t);  //edit-------------------------
+                    cmd.set_next(ptr);
+                    cmd.set_following(ptr);
+                    if(p_begin == true)
+                    {
+                        cmd.set_open_paren(true);
+                    }
+                    if(p_end == true)
+                    {
+                        cmd.set_close_paren(true);
+                    }
+                    return cmd;
                 }
-                if(p_end == true)
+                if(temp.at(0) == '#' || temp == "#")       //checks for comments at beginning (no space)
                 {
-                  cmd.set_close_paren(true);
-                }   
-                return cmd;
-              }
-              if(temp.at(0) == '#' || temp == "#")       //checks for comments at beginning (no space)
-              {
-                Command cmd(command, argument);
-                return cmd;
-              }
-              else if(temp == "&&" || temp == "||" || temp == ";")       // checks for && (spaces on both sides)
-              {
-                string connector = temp;
-                string t;
-                while(split >> temp)
-                {
-                  t += temp + " ";
+                    Command cmd(command, argument);
+                    return cmd;
                 }
-                t = t.substr(0, t.size()-1);
+                else if(temp == "&&" || temp == "||" || temp == ";")       // checks for && (spaces on both sides)
+                {
+                    string connector = temp;
+                    string t;
+                    while(split >> temp)
+                    {
+                        t += temp + " ";
+                    }
+                    t = t.substr(0, t.size()-1);
                     
-                Command cmd(command, argument);
+                    Command cmd(command, argument);
                     
-                Command* ptr = new Command;
-                *ptr = parse(t);
-                if(connector == "&&")
-                {
-                  cmd.set_pass(ptr);
+                    Command* ptr = new Command;
+                    *ptr = parse(t);  //edit-------------------------
+                    if(connector == "&&")
+                    {
+                      cmd.set_pass(ptr);
+                    }
+                    else if(connector == "||")
+                    {
+                      cmd.set_fail(ptr);
+                    }
+                    else if(connector == ";")
+                    {
+                      cmd.set_next(ptr);
+                    }
+                    cmd.set_following(ptr);
+                    //////////////////////////////////////////////////////////////////////////////
+                    if(p_begin == true)
+                    {
+                        cmd.set_open_paren(true);
+                    }
+                    if(p_end == true)
+                    {
+                        cmd.set_close_paren(true);
+                    }
+                    return cmd;
                 }
-                else if(connector == "||")
+                if(temp == "]")
                 {
-                  cmd.set_fail(ptr);
+                    continue;
                 }
-                else if(connector == ";")
-                {
-                  cmd.set_next(ptr);
-                }
-                cmd.set_following(ptr);
-
-                if(p_begin == true)
-                {
-                  cmd.set_open_paren(true);
-                }
-                if(p_end == true)
-                {
-                  cmd.set_close_paren(true);
-                }
-                return cmd;
-              }
-              if(temp == "]")
-              {
-                continue;
                 argument += temp + " ";     //if not a connector it is part of the argument
-              }
             }
-            Command cmd(command, argument); //default, function needs to return at least a command
-            return cmd;
+        Command cmd(command, argument); //default, function needs to return at least a command
+        return cmd;
         }
 };
 
