@@ -26,3 +26,8 @@ ls && #c && ls
 
 ls; #c; ls
 
+(echo hi && echo a) && #dsafsdaf
+
+(echo hi || echo a) || #dsafasdf
+
+

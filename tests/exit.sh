@@ -25,3 +25,10 @@ sl || ls || exit
 ls && ls && exit
 
 exit && sl
+
+(echo a && b) && exit
+
+(asdfsfd || exit) && echo hi
+
+(echo b || exit && echo b && exit)
+
