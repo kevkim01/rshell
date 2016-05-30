@@ -54,6 +54,43 @@ become buggy. As I said before there is no exit(1) called when execvp fails,
 which is the cause of this problem, but we need to return false instead for
 the rest of the program to work properly.
 
+// ASSIGNMENT 3 //
 
+  In this assignment we were to implement the test command which would test 
+for the existance of a file or directory. The user could use three tags to
+do so: either -e, -f, or -d. -e would simply test for the existance of the 
+specified file/directory, -f would test for the existance of the specified
+file, and -d would test for the existance of the specified directory. We also
+had to implement the [ ] command which is the equivalent to calling "test".
+Both commands do the same thing when used in conjunction with the tags and the
+specified file or directory. The user can specify paths to certain files or 
+directories and if no tag is used, the -e tag is used as default.
 
+  We also had to implement parenthesis logic into our existing code. This
+changed the logic of how commands were called as commands within parenthesis
+were executed or not executed as a group. To do so we edited the parse function
+within our command_line.h to be able to identify the beginning and the end of 
+the parenthesis and in our execute command, we had a loop that would traverse 
+through the commands in parenthesis and either call them or not call them.
+
+  One problem we ran into was determining how to distinguish between a file
+and a directory. To solve it we found info.st_mode and built in functions
+S_IFDIR, and S_IFREG which are part of the stat class. Basically these functions
+were made to distinguish between files and directories, so upon using these,
+running test became much easier and worked well.
+
+  Also the way our parse was set up, we were able to parse parenthesis. But it 
+was hard for us to parse for more than one set of parenthesis. We didn't want to
+hardcode where the program should look for parenthesis so we only implemented the
+functionality of handling single parenthesis. 
+
+  We also fixed the exit command from our previous assignment. We had a problem
+that didn't allow us to exit the program because we werent properly testing the
+exit status of execvp. However, upon fixing this our program is now able to exit
+properly. 
+
+  In the specs we were confused about the test.sh files. We weren't sure if we were
+supposed to keep the test files from the last assignment or remove them from the 
+test directory. We ended up just keeping them and adding the test files from this
+assignment to the folder to keep everything in one place. 
 
