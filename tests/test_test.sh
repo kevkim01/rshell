@@ -61,5 +61,15 @@ test -d asdfsdaf && echo a
 
 [ README.md ]
 
+test -e README.md && echo "path exists"
 
+[ -e README.md ] && echo "path exists"
+
+[ README.md ] || echo a && echo b
+
+[ README.md ] && (echo a || echo b)
+
+(test -f Makefile) || echo a
+
+(test Makefile && echo a || echo d) && echo b
 
