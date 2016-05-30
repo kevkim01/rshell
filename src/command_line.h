@@ -54,6 +54,9 @@ class Command_Line          //class that handles the command line input and pars
             string command;
             string argument;
             string temp;
+
+            bool p_begin = false;
+            bool p_end = false;
             
             if(line == "")      //if the line has no content
             {
@@ -63,15 +66,42 @@ class Command_Line          //class that handles the command line input and pars
             
             istringstream split(line);      //split the line by whitespaces
             split >> temp;
-            command = temp; //command will be the first part of the string
+            //command = temp; //command will be the first part of the string
+            
             if(temp.at(0) == '#')
             {
                 Command cmd;
                 return cmd;
             }
+
+            if(temp == "(")
+            {
+              p_begin = true;
+              split >> temp;
+            }
+
+            if(temp.at(0) == '(')
+            {
+              p_begin = true;
+              temp = temp.substr(1, temp.size() -1);
+            }
+
+            if(temp.at(temp.size() -1) == ')')
+            {
+              p_end = true;
+              temp = temp.substr(0, temp.size() -1);
+            }
+            //^^^^^^^^^^^^^^^^^^^^^^ edit made ^^^^^^^^^^^^^^^^^^^^^^^^^^
+            command = temp;
+
             if(command.at(command.size() -1) == ';')        //checks to see if there is a ; after the base command
             {
                 command = temp.substr(0, temp.size()-1);
+                if(command.at(command.size()-1) == ')')
+                {
+                  p_end = true;
+                  command = command.substr(0, command.size() -1);
+                }
                 string t;
                 while(split >> temp)
                 {
@@ -85,18 +115,47 @@ class Command_Line          //class that handles the command line input and pars
                 *ptr = parse(t);
                 cmd.set_next(ptr);
                 cmd.set_following(ptr);
+                if(p_begin == true)
+                {
+                  cmd.set_open_paren(true);
+                }
+                if(p_end == true)
+                {
+                  cmd.set_close_paren(true);
+                }
                 return cmd;
+            }
+            if(command == "[")
+            {
+              command = "test";
             }
             
             while(split >> temp)    //continues to read in the string until a connector is met
             {
-                if(temp.at(temp.size() -1) == ';')  //checks for ; at the end of an argument (no space)
+              if(temp == ")")
+              {
+                p_end = true;
+                continue;
+              }
+
+              if(temp.at(temp.size() -1) == ')')
+              {
+                p_end = true;
+                temp = temp.substr(0, temp.size() -1);
+              }
+
+              if(temp.at(temp.size() -1) == ';')  //checks for ; at the end of an argument (no space)
+              {
+                string s = temp.substr(0, temp.size()-1);
+                if(s.size() != 0 && s.at(s.size()-1) == ')')
                 {
-                    string s = temp.substr(0, temp.size()-1);
-                    argument += s;
+                  p_end = true;
+                  s = s.substr(0, s.size() -1);
+                }
+                argument += s;
                     
-                    string t;
-                    while(split >> temp)
+                string t;
+                while(split >> temp)
                     {
                         t += temp + " ";
                     }
@@ -108,6 +167,15 @@ class Command_Line          //class that handles the command line input and pars
                     *ptr = parse(t);
                     cmd.set_next(ptr);
                     cmd.set_following(ptr);
+
+                    if(p_begin == true)
+                    {
+                      cmd.set_open_paren(true);
+                    }
+                    if(p_end == true)
+                    {
+                      cmd.set_close_paren(true);
+                    }   
                     return cmd;
                 }
                 if(temp.at(0) == '#' || temp == "#")       //checks for comments at beginning (no space)
@@ -142,8 +210,20 @@ class Command_Line          //class that handles the command line input and pars
                       cmd.set_next(ptr);
                     }
                     cmd.set_following(ptr);
+
+                    if(p_begin == true)
+                    {
+                      cmd.set_open_paren(true);
+                    }
+                    if(p_end == true)
+                    {
+                      cmd.set_close_paren(true);
+                    }
                     return cmd;
                 }
+                if(temp == "]")
+                {
+                  continue;
                 argument += temp + " ";     //if not a connector it is part of the argument
             }
         Command cmd(command, argument); //default, function needs to return at least a command
