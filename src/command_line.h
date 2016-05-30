@@ -156,79 +156,79 @@ class Command_Line          //class that handles the command line input and pars
                     
                 string t;
                 while(split >> temp)
-                    {
-                        t += temp + " ";
-                    }
-                    t = t.substr(0, t.size()-1);
+                {
+                  t += temp + " ";
+                }
+                t = t.substr(0, t.size()-1);
                     
-                    Command cmd(command, argument);
+                Command cmd(command, argument);
                     
-                    Command* ptr = new Command;
-                    *ptr = parse(t);
-                    cmd.set_next(ptr);
-                    cmd.set_following(ptr);
+                Command* ptr = new Command;
+                *ptr = parse(t);
+                cmd.set_next(ptr);
+                cmd.set_following(ptr);
 
-                    if(p_begin == true)
-                    {
-                      cmd.set_open_paren(true);
-                    }
-                    if(p_end == true)
-                    {
-                      cmd.set_close_paren(true);
-                    }   
-                    return cmd;
-                }
-                if(temp.at(0) == '#' || temp == "#")       //checks for comments at beginning (no space)
+                if(p_begin == true)
                 {
-                    Command cmd(command, argument);
-                    return cmd;
+                  cmd.set_open_paren(true);
                 }
-                else if(temp == "&&" || temp == "||" || temp == ";")       // checks for && (spaces on both sides)
+                if(p_end == true)
                 {
-                    string connector = temp;
-                    string t;
-                    while(split >> temp)
-                    {
-                        t += temp + " ";
-                    }
-                    t = t.substr(0, t.size()-1);
+                  cmd.set_close_paren(true);
+                }   
+                return cmd;
+              }
+              if(temp.at(0) == '#' || temp == "#")       //checks for comments at beginning (no space)
+              {
+                Command cmd(command, argument);
+                return cmd;
+              }
+              else if(temp == "&&" || temp == "||" || temp == ";")       // checks for && (spaces on both sides)
+              {
+                string connector = temp;
+                string t;
+                while(split >> temp)
+                {
+                  t += temp + " ";
+                }
+                t = t.substr(0, t.size()-1);
                     
-                    Command cmd(command, argument);
+                Command cmd(command, argument);
                     
-                    Command* ptr = new Command;
-                    *ptr = parse(t);
-                    if(connector == "&&")
-                    {
-                      cmd.set_pass(ptr);
-                    }
-                    else if(connector == "||")
-                    {
-                      cmd.set_fail(ptr);
-                    }
-                    else if(connector == ";")
-                    {
-                      cmd.set_next(ptr);
-                    }
-                    cmd.set_following(ptr);
+                Command* ptr = new Command;
+                *ptr = parse(t);
+                if(connector == "&&")
+                {
+                  cmd.set_pass(ptr);
+                }
+                else if(connector == "||")
+                {
+                  cmd.set_fail(ptr);
+                }
+                else if(connector == ";")
+                {
+                  cmd.set_next(ptr);
+                }
+                cmd.set_following(ptr);
 
-                    if(p_begin == true)
-                    {
-                      cmd.set_open_paren(true);
-                    }
-                    if(p_end == true)
-                    {
-                      cmd.set_close_paren(true);
-                    }
-                    return cmd;
-                }
-                if(temp == "]")
+                if(p_begin == true)
                 {
-                  continue;
+                  cmd.set_open_paren(true);
+                }
+                if(p_end == true)
+                {
+                  cmd.set_close_paren(true);
+                }
+                return cmd;
+              }
+              if(temp == "]")
+              {
+                continue;
                 argument += temp + " ";     //if not a connector it is part of the argument
+              }
+              Command cmd(command, argument); //default, function needs to return at least a command
+              return cmd;
             }
-        Command cmd(command, argument); //default, function needs to return at least a command
-        return cmd;
-        }
-};
+        };
 
 #endif
