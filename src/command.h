@@ -160,20 +160,20 @@ class Command       //class command to make objects out of each command
             {
                 if(info.st_mode & S_IFDIR)
                 {
-                    cout << "(TRUE)" << endl;
+                    cout << "(True)" << endl;
                     //cout << "Exists" << endl;
                     b = true;
                 }
                 else if(info.st_mode & S_IFREG)
                 {
-                    cout<< "(TRUE)" << endl;
+                    cout<< "(True)" << endl;
                     //cout << "Exists" << endl;
                     b= true;
                 }
             }
             else
             {
-                cout << "(FALSE)" << endl;
+                cout << "(False)" << endl;
                 //cout << "Not a file/directory" << endl;
                 b= false;
             }
@@ -188,20 +188,20 @@ class Command       //class command to make objects out of each command
             {
                 if(info.st_mode & S_IFDIR)
                 {
-                    cout << "(FALSE)" << endl;
+                    cout << "(False)" << endl;
                     //cout << "It's a directory " << endl;
                     b = false;
                 }
                 else if(info.st_mode & S_IFREG)
                 {
-                    cout<< "(TRUE)" << endl;
+                    cout<< "(True)" << endl;
                     //cout << "It's a file " << endl;
                     b = true;
                 }
             }
             else
             {
-                cout << "(FALSE)" << endl;
+                cout << "(False)" << endl;
                 //cout << "Not a file/directory" << endl;
                 b = false;
             }
@@ -216,20 +216,20 @@ class Command       //class command to make objects out of each command
             {
                 if(info.st_mode & S_IFDIR)
                 {
-                    cout << "(TRUE)" << endl;
+                    cout << "(True)" << endl;
                     //cout << "It's a directory " << endl;
                     b = true;
                 }
                 else if(info.st_mode & S_IFREG)
                 {
-                    cout<< "(FALSE)" << endl;
+                    cout<< "(False)" << endl;
                    // cout << "It's a file " << endl;
                     b = false;
                 }
             }
             else
             {
-                cout << "(FALSE)" << endl;
+                cout << "(False)" << endl;
              //   cout << "Not a file/directory" << endl;
                 b = false;
             }
