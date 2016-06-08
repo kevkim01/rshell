@@ -16,6 +16,7 @@
 #include <boost/algorithm/string.hpp>
 #include <string>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 
 using namespace std;
@@ -25,6 +26,11 @@ class Command       //class command to make objects out of each command
     private:
         string command;     //the command to be executed
         string argument;    //argument for the command
+        
+        ////// edit //////
+        string file;        //name of the specified file for I/O redirection
+        string file2;
+        
         Command* next;// = 0;  //used with ; connector
         Command* fail;// = 0;  //used with || connector
         Command* pass;// = 0;  //used with && connector
@@ -33,6 +39,12 @@ class Command       //class command to make objects out of each command
         bool open_paren;
         bool close_paren;
         
+        ///// edit /////
+        bool input;   //if '<' is found
+        bool output;  //if '>' is found
+        bool output1; //if '>>' is found
+        bool has_pipe;
+        
     public:
         Command()
         {
@@ -40,8 +52,13 @@ class Command       //class command to make objects out of each command
           fail = NULL;
           pass = NULL;
           following = NULL;
+          //pipe = NULL;
           open_paren = false;
           close_paren = false;
+          input = false;
+          output = false;
+          output1 = false;
+          has_pipe = false;
         };
         Command(string c, string a)     //constructor
         {
@@ -51,8 +68,13 @@ class Command       //class command to make objects out of each command
             fail = NULL;
             pass = NULL;
             following = NULL;
+            //pipe = NULL;
             open_paren = false;
             close_paren = false;
+            input = false;
+            output = false;
+            output1 = false;
+            has_pipe = false;
         }
 
         //edit made: destructor
@@ -88,12 +110,53 @@ class Command       //class command to make objects out of each command
         void set_close_paren(bool b)
         {close_paren = b;}
         
+        ////////////////////////////////
+        void set_file(string t)
+        {file = t;}
+        
+        void set_file2(string t)
+        {file2 = t;}
+        
+        void set_input(bool b)
+        {input = b;}
+        
+        void set_output(bool b)
+        {output = b;}
+        
+        void set_output1(bool b)
+        {output1 = b;}
+        
+        void set_has_pipe(bool b)
+        {has_pipe = b;}
+        /////////////////////////////////
+        
         bool get_close_paren()
         {return close_paren;}
-
         
-        bool run(string x, string y)//, bool &istrue)//, bool &global)
+        /////////////////////////////////
+        string get_file()
+        {return file;}
+        
+        string get_file2()
+        {return file2;}
+          
+        bool get_input()
+        {return input;}
+        
+        bool get_output()
+        {return output;}
+        
+        bool get_output1()
+        {return output1;}
+        
+        bool get_has_pipe()
+        {return has_pipe;}
+        ///////////////////////////////////
+        
+        bool run(string x, string y, string z, string z1, bool a, bool b, bool c)//, bool d)//, bool &istrue)//, bool &global)
         {
+          //cout << z << "  " << z1 << endl;
+          //x = command, y = argument, z = file name, z1 = second file name, a = t/f for <, b = t/f for >, c = t/f for >>, d is t/f for |
             bool istrue = true;
             if(x == "exit")
             {
@@ -107,34 +170,70 @@ class Command       //class command to make objects out of each command
             }
             else if(pid == 0)            //child function of fork()
             {
-                char* command = (char*)x.c_str();
+              const char* f_name = z.c_str(); //f_name is the name of the file
+              const char* f_name2 = z1.c_str();
+              if(a == true && b == true)
+              {
+                int in, out;
+                in = open(f_name ,O_RDONLY);
+                out = open(f_name2 ,O_WRONLY|O_CREAT,0666); // Should also be symbolic values for access rights
+                //out = open(f_name, O_WRONLY|O_TRUNC|O_CREAT, S_IRUSR|S_IRGRP|S_IWGRP|S_IWUSR);
                 
-                vector<string> argus;           //vector of argument strings
+                dup2(in, 0);
+                dup2(out,1);
+                
+                close(in);
+                close(out);
+              }
+              else if(a == true)
+              {
+                int in = open(f_name ,O_RDONLY);
+                dup2(in,STDIN_FILENO);
+                close(in);
+              }
+              
+              else if(b == true)
+              {
+                int out = open(f_name ,O_WRONLY|O_CREAT,0666); // Should also be symbolic values for access rights
+                dup2(out,STDOUT_FILENO);
+                close(out);
+              }
+              
+              else if(c == true)
+              {
+                int out1 = open(f_name ,O_WRONLY|O_APPEND|O_CREAT,0666); // Should also be symbolic values for access rights
+                dup2(out1,STDOUT_FILENO);
+                close(out1);
+              }
+              
+              char* command = (char*)x.c_str();
+              
+              vector<string> argus;           //vector of argument strings
 
-                istringstream ss(y);
-                string temp;
-                while(ss >> temp)
-                {
-                  argus.push_back(temp);
-                }
-                //edit
-                int size = 2 + argus.size();    //size = command + NULL + # of arguments
-                char** const args = new char*[size];
-                args[0] = command;
-                args[size - 1] = NULL;
-                for (unsigned i = 1; i <= argus.size(); i++)
-                {
-                    args[i] = (char*)argus.at(i - 1).c_str();
-                }
-                //edit
-                int errno;
-                errno = execvp(command, args);
-                if(errno < 0)
-                {
-                    perror("bash");
-                    exit(1);
-                }
-                exit(0);
+              istringstream ss(y);
+              string temp;
+              while(ss >> temp)
+              {
+                argus.push_back(temp);
+              }
+              //edit
+              int size = 2 + argus.size();    //size = command + NULL + # of arguments
+              char** const args = new char*[size];
+              args[0] = command;
+              args[size - 1] = NULL;
+              for (unsigned i = 1; i <= argus.size(); i++)
+              {
+                  args[i] = (char*)argus.at(i - 1).c_str();
+              }
+              //edit
+              int errno;
+              errno = execvp(command, args);
+              if(errno < 0)
+              {
+                  perror("bash");
+                  exit(1);
+              }
+              exit(0);
             }
             else if(pid > 0)     //parent from fork, will wait for child to finish running
             {
@@ -161,20 +260,17 @@ class Command       //class command to make objects out of each command
                 if(info.st_mode & S_IFDIR)
                 {
                     cout << "(True)" << endl;
-                    //cout << "Exists" << endl;
                     b = true;
                 }
                 else if(info.st_mode & S_IFREG)
                 {
                     cout<< "(True)" << endl;
-                    //cout << "Exists" << endl;
                     b= true;
                 }
             }
             else
             {
                 cout << "(False)" << endl;
-                //cout << "Not a file/directory" << endl;
                 b= false;
             }
             return b;
@@ -189,20 +285,17 @@ class Command       //class command to make objects out of each command
                 if(info.st_mode & S_IFDIR)
                 {
                     cout << "(False)" << endl;
-                    //cout << "It's a directory " << endl;
                     b = false;
                 }
                 else if(info.st_mode & S_IFREG)
                 {
                     cout<< "(True)" << endl;
-                    //cout << "It's a file " << endl;
                     b = true;
                 }
             }
             else
             {
                 cout << "(False)" << endl;
-                //cout << "Not a file/directory" << endl;
                 b = false;
             }
             return b;
@@ -217,20 +310,17 @@ class Command       //class command to make objects out of each command
                 if(info.st_mode & S_IFDIR)
                 {
                     cout << "(True)" << endl;
-                    //cout << "It's a directory " << endl;
                     b = true;
                 }
                 else if(info.st_mode & S_IFREG)
                 {
                     cout<< "(False)" << endl;
-                   // cout << "It's a file " << endl;
                     b = false;
                 }
             }
             else
             {
                 cout << "(False)" << endl;
-             //   cout << "Not a file/directory" << endl;
                 b = false;
             }
             return b;
@@ -284,10 +374,47 @@ class Command       //class command to make objects out of each command
             return b;
         }
         
+        void pipe_execute(vector<Command> v)
+        {
+          unsigned i;
+          int in, fd[2];
+          
+          in = 0;
+          for(i = 0; i < v.size(); ++i)
+          {
+            pipe(fd);
+            string x = v.at(i).get_cmd();
+            string y = v.at(i).get_arg();
+            string z = v.at(i).get_file();
+            string z1 = v.at(i).get_file2();
+            bool a = v.at(i).get_input();   //gets t/f for <
+            bool b = v.at(i).get_output();  //gets t/f for >
+            bool c = v.at(i).get_output1(); //gets t/f for  >>
+            
+            run(x,y,z,z1,a,b,c);
+            
+            close(fd[1]);
+            in = fd[0];
+          }
+          if(in != 0)
+          {
+            dup2(in,0);
+          }
+          
+          return;
+        }
+        
         void execute(int t, bool previous)
         {
           string x = this -> command;
           string y = this -> argument;
+          string z = this -> file;
+          string z1 = this -> file2;
+          
+          bool a = get_input();   //gets t/f for <
+          bool b = get_output();  //gets t/f for >
+          bool c = get_output1(); //gets t/f for  >>
+          //bool d = false;
           
           bool executed = true;
           
@@ -306,14 +433,27 @@ class Command       //class command to make objects out of each command
             return;
           }
           
-          // if(open_paren == true)
-          // {
-          //   cout<< "open paren is true" << endl;
-          // }
-          // if(close_paren == true)
-          // {
-          //   cout << "close paren is true" << endl;
-          // }
+          ////////////////////////////////////////////////////////////////////////////
+          vector<Command> pipe_cmds;
+          if(has_pipe == true)
+          {
+            pipe_cmds.push_back(*this);
+            for(Command* curr = following; curr != NULL; curr = curr -> following)
+            {
+              pipe_cmds.push_back(*curr);
+              if(curr -> get_has_pipe() == false)
+              {
+                pipe_execute(pipe_cmds);
+                if(curr -> following != NULL)
+                {
+                  curr -> following -> execute(1, true);
+                }
+                break;
+              }
+            }
+            return;
+          }
+          ////////////////////////////////////////////////////////////////////////////
           
           //edit------------------------------------------------------------------------
           if(x == "test")                 //handles the test command
@@ -340,8 +480,8 @@ class Command       //class command to make objects out of each command
               fail -> execute(0, true);
             }
             return;
-            }
-
+          }
+          
           
           if(x == "")       //empty command, just returns
           {
@@ -350,7 +490,7 @@ class Command       //class command to make objects out of each command
           
           if(t == 1)                //if the current command will execute
           {
-            executed = run(x,y);
+            executed = run(x,y,z,z1,a,b,c);//,d);
           }   
           else                                //if current command wont execute
           {

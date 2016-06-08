@@ -54,9 +54,15 @@ class Command_Line          //class that handles the command line input and pars
             string command;
             string argument;
             string temp;
+            
+            string file = "";
+            string file2 = "";
             //--------------------------------------------
             bool p_begin = false;
             bool p_end = false;
+            bool in = false; // <
+            bool out = false; // >
+            bool out1 = false; // >>
             //--------------------------------------------
             
             if(line == "")      //if the line has no content
@@ -126,6 +132,20 @@ class Command_Line          //class that handles the command line input and pars
                 {
                     cmd.set_close_paren(true);
                 }
+                if(in == true)
+                {
+                    cmd.set_input(true);
+                }
+                if(out == true)
+                {
+                    cmd.set_output(true);
+                }
+                if(out1 == true)
+                {
+                    cmd.set_output1(true);
+                }
+                cmd.set_file(file);
+                cmd.set_file2(file2);
                 return cmd;
             }
             if(command == "[")
@@ -135,6 +155,30 @@ class Command_Line          //class that handles the command line input and pars
             
             while(split >> temp)    //continues to read in the string until a connector is met
             {
+                if(temp == "<" || temp == ">" || temp == ">>")
+                {
+                    if(temp == "<")
+                    {
+                        in = true;
+                    }
+                    if(temp == ">")
+                    {
+                        out = true;
+                    }
+                    if(temp == ">>")
+                    {
+                        out1 = true;
+                    }
+                    split >> temp;
+                    if(in == true && out == true)
+                    {
+                        file2 = temp;
+                        continue;
+                    }
+                    file = temp;
+                    continue;
+                }
+                
                 if(temp == ")")
                 {
                     p_end = true;
@@ -180,6 +224,20 @@ class Command_Line          //class that handles the command line input and pars
                     {
                         cmd.set_close_paren(true);
                     }
+                    if(in == true)
+                    {
+                        cmd.set_input(true);
+                    }
+                    if(out == true)
+                    {
+                        cmd.set_output(true);
+                    }
+                    if(out1 == true)
+                    {
+                        cmd.set_output1(true);
+                    }
+                    cmd.set_file(file);
+                    cmd.set_file2(file2);
                     return cmd;
                 }
                 if(temp.at(0) == '#' || temp == "#")       //checks for comments at beginning (no space)
@@ -187,7 +245,7 @@ class Command_Line          //class that handles the command line input and pars
                     Command cmd(command, argument);
                     return cmd;
                 }
-                else if(temp == "&&" || temp == "||" || temp == ";")       // checks for && (spaces on both sides)
+                else if(temp == "&&" || temp == "||" || temp == ";" || temp == "|")       // checks for && (spaces on both sides)
                 {
                     string connector = temp;
                     string t;
@@ -213,6 +271,10 @@ class Command_Line          //class that handles the command line input and pars
                     {
                       cmd.set_next(ptr);
                     }
+                    else if(connector == "|")
+                    {
+                        cmd.set_has_pipe(true);
+                    }
                     cmd.set_following(ptr);
                     //////////////////////////////////////////////////////////////////////////////
                     if(p_begin == true)
@@ -223,6 +285,20 @@ class Command_Line          //class that handles the command line input and pars
                     {
                         cmd.set_close_paren(true);
                     }
+                    if(in == true)
+                    {
+                        cmd.set_input(true);
+                    }
+                    if(out == true)
+                    {
+                        cmd.set_output(true);
+                    }
+                    if(out1 == true)
+                    {
+                        cmd.set_output1(true);
+                    }
+                    cmd.set_file(file);
+                    cmd.set_file2(file2);
                     return cmd;
                 }
                 if(temp == "]")
@@ -232,6 +308,20 @@ class Command_Line          //class that handles the command line input and pars
                 argument += temp + " ";     //if not a connector it is part of the argument
             }
         Command cmd(command, argument); //default, function needs to return at least a command
+        if(in == true)
+        {
+            cmd.set_input(true);
+        }
+        if(out == true)
+        {
+            cmd.set_output(true);
+        }
+        if(out1 == true)
+        {
+            cmd.set_output1(true);
+        }
+        cmd.set_file(file);
+        cmd.set_file2(file2);
         return cmd;
         }
 };
