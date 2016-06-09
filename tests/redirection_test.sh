@@ -21,3 +21,11 @@ cat < README.md | tr a-z A-Z
 cat README.md | tee newOutputFile
 
 tr a-z A-Z > newOutputFile2
+
+cat README.md | tr a-z A-Z && echo hi
+
+cat README.md | tr a-z A-Z && ls
+
+cat README.md | tr a-z A-Z || ls
+
+cat README.md | tr a-z A-Z || echo hi
