@@ -106,4 +106,6 @@ One problem with our program is that it can’t handle pipes that are strung tog
 
 Another issue to address is, only one of us was able to push this assignment and commit to github. Kevin had to go home for his sister’s graduation and was not able to work on his linux computer at school. Instead we worked together on a collaborative workspace and Dillon was responsible for adding, pushing, and commiting to git.
 
+We also added more test cases to the test.sh folder
+
 
