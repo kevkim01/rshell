@@ -94,3 +94,14 @@ supposed to keep the test files from the last assignment or remove them from the
 test directory. We ended up just keeping them and adding the test files from this
 assignment to the folder to keep everything in one place. 
 
+//ASSIGNMENT 4//
+In this lab we had to implement input/output redirection and piping. The input output redirection part of the lab wasn’t too hard. To accomplish this we used the dup function. We were able to implement the functionality of < (input redirection), > (output redirection), and  >> (output redirection). The difference between the >, and >> functions are that if the file already exists, the >> function will append the specified information to the end, while the > will overwrite the preexisting file completely.
+
+The piping part of the lab was a bit more difficult for us based on the way we had set up our previous portions of this project. We had to parse for piping and then store the commands which were to be piped into a vector. The vector was then passed into a function that specifically executed piping. 
+One problem with our program is that it can’t handle pipes that are strung together. For example, in the example provided in the specs which consists of command | command | command | command, our program won’t be able to handle this. Due to finals and other time constraints we were only able to implement functionality for two commands and one pipe (ie: command | command). If we had more time this would likely be an easy fix but right now it’s the best we have. We also implemented the functionality where, if a user wants to pipe and then use connectors they can. 
+
+(ie: command | command ; command) will work.
+
+Another issue to address is, only one of us was able to push this assignment and commit to github. Kevin had to go home for his sister’s graduation and was not able to work on his linux computer at school. Instead we worked together on a collaborative workspace and Dillon was responsible for adding, pushing, and commiting to git.
+
+
