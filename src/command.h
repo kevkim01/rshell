@@ -155,7 +155,6 @@ class Command       //class command to make objects out of each command
         
         bool run(string x, string y, string z, string z1, bool a, bool b, bool c)//, bool d)//, bool &istrue)//, bool &global)
         {
-          //cout << z << "  " << z1 << endl;
           //x = command, y = argument, z = file name, z1 = second file name, a = t/f for <, b = t/f for >, c = t/f for >>, d is t/f for |
             bool istrue = true;
             if(x == "exit")
@@ -374,35 +373,88 @@ class Command       //class command to make objects out of each command
             return b;
         }
         
-        void pipe_execute(vector<Command> v)
+        char** help(vector<Command> v, int index)
         {
-          unsigned i;
-          int in, fd[2];
-          
-          in = 0;
-          for(i = 0; i < v.size(); ++i)
-          {
-            pipe(fd);
-            string x = v.at(i).get_cmd();
-            string y = v.at(i).get_arg();
-            string z = v.at(i).get_file();
-            string z1 = v.at(i).get_file2();
-            bool a = v.at(i).get_input();   //gets t/f for <
-            bool b = v.at(i).get_output();  //gets t/f for >
-            bool c = v.at(i).get_output1(); //gets t/f for  >>
+            string x = v.at(index).get_cmd();
+            string y = v.at(index).get_arg();
+            string z = v.at(index).get_file();
+            string z1 = v.at(index).get_file2();
+            char* command = (char*)x.c_str();
             
-            run(x,y,z,z1,a,b,c);
+            vector<string> argus;           //vector of argument strings
             
-            close(fd[1]);
-            in = fd[0];
-          }
-          if(in != 0)
-          {
-            dup2(in,0);
-          }
-          
-          return;
+            istringstream ss(y);
+            string temp;
+            while(ss >> temp)
+            {
+                argus.push_back(temp);
+            }
+            int size = 2 + argus.size();    //size = command + NULL + # of arguments
+            char** const args = new char*[size];
+            args[0] = command;
+            args[size - 1] = NULL;
+            for (unsigned i = 1; i <= argus.size(); i++)
+            {
+              args[i] = (char*)argus.at(i - 1).c_str();
+            }
+            return args;
         }
+        
+        void pipe_execute_one(vector<Command> v)        // cmd | cmd
+        {
+          pid_t pid1 = fork();
+          
+          if(pid1 < 0)
+          {
+            perror("fork");
+            exit(1);
+          }
+          else if(pid1 == 0)
+          {
+            int pipefd[2];
+            pipe(pipefd);
+          
+            pid_t pid = fork();
+            if(pid < 0)
+            {
+              perror("fork");
+              exit(1);
+            }
+          
+            if (pid == 0)
+            {
+              dup2(pipefd[1], 1);
+              close(pipefd[0]);
+              
+              char ** cmd = help(v,0);
+              char* command = (char*)v.at(0).get_cmd().c_str();   
+              execvp(command, cmd);
+              perror("execvp");
+              exit(1);
+            }
+            else if(pid > 0)
+            {
+              int status = 0;
+              waitpid(pid, &status, 0);
+              
+              dup2(pipefd[0], 0);
+              close(pipefd[1]);
+              char ** cmd1 = help(v,1);
+              char* command1 = (char*)v.at(1).get_cmd().c_str();
+              
+              execvp(command1, cmd1);
+              perror("execvp");
+              exit(1);
+            }
+          }
+          else if(pid1 > 0)
+          {
+            int status = 0;
+            waitpid(pid1, &status,0);
+            return;
+          }
+        }
+
         
         void execute(int t, bool previous)
         {
@@ -435,15 +487,29 @@ class Command       //class command to make objects out of each command
           
           ////////////////////////////////////////////////////////////////////////////
           vector<Command> pipe_cmds;
+          int count = 0;
           if(has_pipe == true)
           {
             pipe_cmds.push_back(*this);
             for(Command* curr = following; curr != NULL; curr = curr -> following)
             {
               pipe_cmds.push_back(*curr);
+              ++count;
               if(curr -> get_has_pipe() == false)
               {
-                pipe_execute(pipe_cmds);
+                //if(count == 2) //2 commands = 1 pipe
+                //{
+                  pipe_execute_one(pipe_cmds);
+                //}
+                // if(count == 3)  //3 commands = 2 pipes
+                // {
+                //   pipe_execute_two(pipe_cmds);
+                // }
+                // if(count == 4)  //4 commands = 3 pipes
+                // {
+                //   pipe_execute_three(pipe_cmds);
+                // }
+                //pipe_execute(pipe_cmds, count);
                 if(curr -> following != NULL)
                 {
                   curr -> following -> execute(1, true);
