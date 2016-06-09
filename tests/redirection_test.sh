@@ -14,4 +14,4 @@ sort < filelist.txt
 
 sort < filelist.txt > sortedfilelist.txt
 
-
+cat README.md | tr a-z A-Z
