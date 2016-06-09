@@ -427,7 +427,49 @@ class Command       //class command to make objects out of each command
               close(pipefd[0]);
               
               char ** cmd = help(v,0);
-              char* command = (char*)v.at(0).get_cmd().c_str();   
+              char* command = (char*)v.at(0).get_cmd().c_str();
+              
+              string z = v.at(0).get_file();
+              string z1 = v.at(0).get_file2();
+              bool a = v.at(0).get_input();
+              bool b = v.at(0).get_output();
+              bool c = v.at(0).get_output1();
+              const char* f_name = z.c_str(); //f_name is the name of the file
+              const char* f_name2 = z1.c_str();
+              if(a == true && b == true)
+              {
+                int in, out;
+                in = open(f_name ,O_RDONLY);
+                out = open(f_name2 ,O_WRONLY|O_CREAT,0666); // Should also be symbolic values for access rights
+                //out = open(f_name, O_WRONLY|O_TRUNC|O_CREAT, S_IRUSR|S_IRGRP|S_IWGRP|S_IWUSR);
+                
+                dup2(in, 0);
+                dup2(out,1);
+                
+                close(in);
+                close(out);
+              }
+              else if(a == true)
+              {
+                int in = open(f_name ,O_RDONLY);
+                dup2(in,STDIN_FILENO);
+                close(in);
+              }
+              
+              else if(b == true)
+              {
+                int out = open(f_name ,O_WRONLY|O_CREAT,0666); // Should also be symbolic values for access rights
+                dup2(out,STDOUT_FILENO);
+                close(out);
+              }
+              
+              else if(c == true)
+              {
+                int out1 = open(f_name ,O_WRONLY|O_APPEND|O_CREAT,0666); // Should also be symbolic values for access rights
+                dup2(out1,STDOUT_FILENO);
+                close(out1);
+              }
+              
               execvp(command, cmd);
               perror("execvp");
               exit(1);
@@ -439,8 +481,51 @@ class Command       //class command to make objects out of each command
               
               dup2(pipefd[0], 0);
               close(pipefd[1]);
+              
+              string z = v.at(1).get_file();
+              string z1 = v.at(1).get_file2();
+              bool a = v.at(1).get_input();
+              bool b = v.at(1).get_output();
+              bool c = v.at(1).get_output1();
+              const char* f_name = z.c_str(); //f_name is the name of the file
+              const char* f_name2 = z1.c_str();
+              
               char ** cmd1 = help(v,1);
               char* command1 = (char*)v.at(1).get_cmd().c_str();
+              
+              if(a == true && b == true)
+              {
+                int in, out;
+                in = open(f_name ,O_RDONLY);
+                out = open(f_name2 ,O_WRONLY|O_CREAT,0666); // Should also be symbolic values for access rights
+                //out = open(f_name, O_WRONLY|O_TRUNC|O_CREAT, S_IRUSR|S_IRGRP|S_IWGRP|S_IWUSR);
+                
+                dup2(in, 0);
+                dup2(out,1);
+                
+                close(in);
+                close(out);
+              }
+              else if(a == true)
+              {
+                int in = open(f_name ,O_RDONLY);
+                dup2(in,STDIN_FILENO);
+                close(in);
+              }
+              
+              else if(b == true)
+              {
+                int out = open(f_name ,O_WRONLY|O_CREAT,0666); // Should also be symbolic values for access rights
+                dup2(out,STDOUT_FILENO);
+                close(out);
+              }
+              
+              else if(c == true)
+              {
+                int out1 = open(f_name ,O_WRONLY|O_APPEND|O_CREAT,0666); // Should also be symbolic values for access rights
+                dup2(out1,STDOUT_FILENO);
+                close(out1);
+              }
               
               execvp(command1, cmd1);
               perror("execvp");
@@ -487,29 +572,21 @@ class Command       //class command to make objects out of each command
           
           ////////////////////////////////////////////////////////////////////////////
           vector<Command> pipe_cmds;
-          int count = 0;
+          int count = 1;
           if(has_pipe == true)
           {
             pipe_cmds.push_back(*this);
+            
             for(Command* curr = following; curr != NULL; curr = curr -> following)
             {
               pipe_cmds.push_back(*curr);
               ++count;
               if(curr -> get_has_pipe() == false)
               {
-                //if(count == 2) //2 commands = 1 pipe
-                //{
-                  pipe_execute_one(pipe_cmds);
-                //}
-                // if(count == 3)  //3 commands = 2 pipes
-                // {
-                //   pipe_execute_two(pipe_cmds);
-                // }
-                // if(count == 4)  //4 commands = 3 pipes
-                // {
-                //   pipe_execute_three(pipe_cmds);
-                // }
-                //pipe_execute(pipe_cmds, count);
+                if(count == 2)
+                {
+                    pipe_execute_one(pipe_cmds);
+                }
                 if(curr -> following != NULL)
                 {
                   curr -> following -> execute(1, true);
