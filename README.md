@@ -95,6 +95,8 @@ test directory. We ended up just keeping them and adding the test files from thi
 assignment to the folder to keep everything in one place. 
 
 //ASSIGNMENT 4//
+
+
 In this lab we had to implement input/output redirection and piping. The input output redirection part of the lab wasn’t too hard. To accomplish this we used the dup function. We were able to implement the functionality of < (input redirection), > (output redirection), and  >> (output redirection). The difference between the >, and >> functions are that if the file already exists, the >> function will append the specified information to the end, while the > will overwrite the preexisting file completely.
 
 The piping part of the lab was a bit more difficult for us based on the way we had set up our previous portions of this project. We had to parse for piping and then store the commands which were to be piped into a vector. The vector was then passed into a function that specifically executed piping. 
